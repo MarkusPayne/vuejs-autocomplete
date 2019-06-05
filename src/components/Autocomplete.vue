@@ -1,7 +1,6 @@
 <template>
   <div class="autocomplete">
     <div class="autocomplete__box" :class="{'autocomplete__searching' : showResults}">
-
       <img v-if="!isLoading" class="autocomplete__icon" src="../assets/search.svg">
       <img v-else class="autocomplete__icon animate-spin" src="../assets/loading.svg">
 
@@ -22,12 +21,17 @@
           @focus="focus"
           @blur="blur"
           type="text"
-          autocomplete="off">
+          autocomplete="off"
+        >
         <input :name="name" type="hidden" :value="value">
       </div>
 
       <!-- clearButtonIcon -->
-      <span v-show="!disableInput && !isEmpty && !isLoading && !hasError" class="autocomplete__icon autocomplete--clear" @click="clear">
+      <span
+        v-show="!disableInput && !isEmpty && !isLoading && !hasError"
+        class="autocomplete__icon autocomplete--clear"
+        @click="clear"
+      >
         <span v-if="clearButtonIcon" :class="clearButtonIcon"></span>
         <img v-else src="../assets/close.svg">
       </span>
@@ -36,19 +40,22 @@
     <ul v-show="showResults" class="autocomplete__results" :style="listStyle">
       <slot name="results">
         <!-- error -->
-        <li v-if="hasError" class="autocomplete__results__item autocomplete__results__item--error">{{ error }}</li>
+        <li
+          v-if="hasError"
+          class="autocomplete__results__item autocomplete__results__item--error"
+        >{{ error }}</li>
 
         <!-- results -->
         <template v-if="!hasError">
           <slot name="firstResult"></slot>
           <li
-              v-for="(result, key) in results"
-              :key="key"
-              @click.prevent="select(result)"
-              class="autocomplete__results__item"
-              :class="{'autocomplete__selected' : isSelected(key) }"
-              v-html="formatDisplay(result)">
-          </li>
+            v-for="(result, key) in results"
+            :key="key"
+            @click.prevent="select(result)"
+            class="autocomplete__results__item"
+            :class="{'autocomplete__selected' : isSelected(key) }"
+            v-html="formatDisplay(result)"
+          ></li>
           <slot name="lastResult"></slot>
         </template>
 
@@ -182,7 +189,7 @@ export default {
       type: Number
     }
   },
-  data () {
+  data() {
     return {
       value: null,
       display: null,
@@ -197,29 +204,29 @@ export default {
     }
   },
   computed: {
-    showResults () {
+    showResults() {
       return Array.isArray(this.results) || this.hasError
     },
-    noResults () {
+    noResults() {
       return Array.isArray(this.results) && this.results.length === 0
     },
-    noResultMessage () {
+    noResultMessage() {
       return this.noResults &&
         !this.isLoading &&
         this.isFocussed &&
         !this.hasError &&
         this.showNoResults
     },
-    isEmpty () {
+    isEmpty() {
       return !this.display
     },
-    isLoading () {
+    isLoading() {
       return this.loading === true
     },
-    hasError () {
+    hasError() {
       return this.error !== null
     },
-    listStyle () {
+    listStyle() {
       if (this.isLoading) {
         return {
           color: '#ccc'
@@ -231,7 +238,7 @@ export default {
     /**
      * Search wrapper method
      */
-    search () {
+    search() {
       this.selectedIndex = null
       switch (true) {
         case typeof this.source === 'string':
@@ -272,36 +279,22 @@ export default {
      * Make an http request for results
      * @param {String} url
      */
-    request (url) {
-      let promise = fetch(url, {
-        method: this.method,
-        credentials: this.getCredentials(),
-        headers: this.getHeaders()
-      })
+    request(url) {
+      axios.get(url).then(response => {
 
-      return promise
-        .then(response => {
-          if (response.ok) {
-            this.error = null
-            return response.json()
-          }
-          throw new Error('Network response was not ok.')
-        })
-        .then(response => {
-          this.results = this.setResults(response)
-          this.emitRequestResultEvent()
-          this.loading = false
-        })
-        .catch(error => {
-          this.error = error.message
-          this.loading = false
-        })
+        this.results = this.setResults(response)
+        this.emitRequestResultEvent()
+        this.loading = false
+      }).catch(error => {
+        this.error = error.message
+        this.loading = false
+      })
     },
 
     /**
      * Set some default headers and apply user supplied headers
      */
-    getHeaders () {
+    getHeaders() {
       const headers = {
         'Accept': 'application/json, text/plain, */*'
       }
@@ -316,7 +309,7 @@ export default {
     /**
      * Set default credentials and apply user supplied value
      */
-    getCredentials () {
+    getCredentials() {
       let credentials = 'same-origin'
       if (this.credentials) {
         credentials = this.credentials
@@ -329,7 +322,7 @@ export default {
      * @param {Object|Array} response
      * @return {Array}
      */
-    setResults (response) {
+    setResults(response) {
       if (this.resultsFormatter) {
         return this.resultsFormatter(response)
       }
@@ -345,29 +338,29 @@ export default {
     /**
      * Emit an event based on the request results
      */
-    emitRequestResultEvent () {
+    emitRequestResultEvent() {
       if (this.results.length === 0) {
-        this.$emit('noResults', {query: this.display})
+        this.$emit('noResults', { query: this.display })
       } else {
-        this.$emit('results', {results: this.results})
+        this.$emit('results', { results: this.results })
       }
     },
 
     /**
      * Search in results passed via an array
      */
-    arrayLikeSearch () {
+    arrayLikeSearch() {
       this.setEventListener()
       if (!this.display) {
         this.results = this.source
-        this.$emit('results', {results: this.results})
+        this.$emit('results', { results: this.results })
         this.loading = false
         return true
       }
       this.results = this.source.filter((item) => {
         return this.formatDisplay(item).toLowerCase().includes(this.display.toLowerCase())
       })
-      this.$emit('results', {results: this.results})
+      this.$emit('results', { results: this.results })
       this.loading = false
     },
 
@@ -375,7 +368,7 @@ export default {
      * Select a result
      * @param {Object}
      */
-    select (obj) {
+    select(obj) {
       if (!obj) {
         return
       }
@@ -395,7 +388,7 @@ export default {
      * @param  {Object} obj
      * @return {String}
      */
-    formatDisplay (obj) {
+    formatDisplay(obj) {
       switch (typeof this.resultsDisplay) {
         case 'function':
           return this.resultsDisplay(obj)
@@ -412,14 +405,14 @@ export default {
     /**
      * Register the component as focussed
      */
-    focus () {
+    focus() {
       this.isFocussed = true
     },
 
     /**
      * Remove the focussed value
      */
-    blur () {
+    blur() {
       this.isFocussed = false
     },
 
@@ -428,14 +421,14 @@ export default {
      * @param {Object}
      * @return {Boolean}
      */
-    isSelected (key) {
+    isSelected(key) {
       return key === this.selectedIndex
     },
 
     /**
      * Focus on the previous results item
      */
-    up () {
+    up() {
       if (this.selectedIndex === null) {
         this.selectedIndex = this.results.length - 1
         return
@@ -446,7 +439,7 @@ export default {
     /**
      * Focus on the next results item
      */
-    down () {
+    down() {
       if (this.selectedIndex === null) {
         this.selectedIndex = 0
         return
@@ -457,7 +450,7 @@ export default {
     /**
      * Select an item via the keyboard
      */
-    enter () {
+    enter() {
       if (this.selectedIndex === null) {
         this.$emit('nothingSelected', this.display)
         return
@@ -469,7 +462,7 @@ export default {
     /**
      * Clear all values, results and errors
      */
-    clear () {
+    clear() {
       this.display = null
       this.value = null
       this.results = null
@@ -480,7 +473,7 @@ export default {
     /**
      * Close the results list. If nothing was selected clear the search
      */
-    close () {
+    close() {
       if (!this.value || !this.selectedDisplay) {
         this.clear()
       }
@@ -497,7 +490,7 @@ export default {
     /**
      * Add event listener for clicks outside the results
      */
-    setEventListener () {
+    setEventListener() {
       if (this.eventListener) {
         return false
       }
@@ -509,7 +502,7 @@ export default {
     /**
      * Remove the click event listener
      */
-    removeEventListener () {
+    removeEventListener() {
       this.eventListener = false
       document.removeEventListener('click', this.clickOutsideListener, true)
     },
@@ -517,13 +510,13 @@ export default {
     /**
      * Method invoked by the event listener
      */
-    clickOutsideListener (event) {
+    clickOutsideListener(event) {
       if (this.$el && !this.$el.contains(event.target)) {
         this.close()
       }
     }
   },
-  mounted () {
+  mounted() {
     this.value = this.initialValue
     this.display = this.initialDisplay
     this.selectedDisplay = this.initialDisplay
@@ -532,72 +525,94 @@ export default {
 </script>
 
 <style lang="stylus">
-.autocomplete
-  position relative
-  width 100%
-  *
-    box-sizing border-box
+.autocomplete {
+  position: relative;
+  width: 100%;
 
-.autocomplete__box
-  display flex
-  align-items center
-  background #fff
-  border: 1px solid #ccc
-  border-radius 3px
-  padding 0 5px
+  * {
+    box-sizing: border-box;
+  }
+}
 
-.autocomplete__searching
-  border-radius 3px 3px 0 0
+.autocomplete__box {
+  display: flex;
+  align-items: center;
+  background: #fff;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+  padding: 0 5px;
+}
 
-.autocomplete__inputs
-  flex-grow 1
-  padding 0 5px
-  input
-    width 100%
-    border 0
-    &:focus
-      outline none
+.autocomplete__searching {
+  border-radius: 3px 3px 0 0;
+}
 
-.autocomplete--clear
-  cursor pointer
+.autocomplete__inputs {
+  flex-grow: 1;
+  padding: 0 5px;
 
-.autocomplete__results
-  margin 0
-  padding 0
-  list-style-type none
-  z-index 1000
-  position absolute
-  max-height 400px
-  overflow-y auto
-  background white
-  width 100%
-  border 1px solid #ccc
-  border-top 0
-  color black
+  input {
+    width: 100%;
+    border: 0;
 
-.autocomplete__results__item--error
-  color red
+    &:focus {
+      outline: none;
+    }
+  }
+}
 
-.autocomplete__results__item
-  padding 7px 10px
-  cursor pointer
-  &:hover
-    background rgba(0, 180, 255, 0.075)
-  &.autocomplete__selected
-    background rgba(0, 180, 255, 0.15)
+.autocomplete--clear {
+  cursor: pointer;
+}
 
-.autocomplete__icon
-  height 14px
-  width 14px
+.autocomplete__results {
+  margin: 0;
+  padding: 0;
+  list-style-type: none;
+  z-index: 1000;
+  position: absolute;
+  max-height: 400px;
+  overflow-y: auto;
+  background: white;
+  width: 100%;
+  border: 1px solid #ccc;
+  border-top: 0;
+  color: black;
+}
 
-.animate-spin
-  animation spin 2s infinite linear
+.autocomplete__results__item--error {
+  color: red;
+}
 
-@keyframes spin
-  from
-    transform rotate(0deg)
-  to
-    transform rotate(360deg)
+.autocomplete__results__item {
+  padding: 7px 10px;
+  cursor: pointer;
 
+  &:hover {
+    background: rgba(0, 180, 255, 0.075);
+  }
 
+  &.autocomplete__selected {
+    background: rgba(0, 180, 255, 0.15);
+  }
+}
+
+.autocomplete__icon {
+  height: 14px;
+  width: 14px;
+}
+
+.animate-spin {
+  animation: spin 2s infinite linear;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
 </style>
