@@ -26,10 +26,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/charliekassel/vuejs-autocomplete"
+    "url": "https://github.com/MarkusPayne/vuejs-autocomplete"
   },
   "bugs": {
-    "url": "https://github.com/charliekassel/vuejs-autocomplete/issues"
+    "url": "https://github.com/MarkusPayne/vuejs-autocomplete/issues"
   },
   "dependencies": {},
   "devDependencies": {
